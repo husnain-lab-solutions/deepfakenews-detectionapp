@@ -36,8 +36,10 @@ public class PredictController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Do not crash the whole request pipeline if Python service is down.
-            return StatusCode(503, new PredictionResponse($"ServiceUnavailable: {ex.GetType().Name}", 0f));
+            // Log and return a helpful error for CI diagnostics
+            Console.WriteLine($"PredictText error: {ex}");
+            var msg = string.IsNullOrWhiteSpace(ex.Message) ? ex.GetType().Name : $"{ex.GetType().Name}: {ex.Message}";
+            return StatusCode(503, new PredictionResponse($"ServiceUnavailable: {msg}", 0f));
         }
         var userId = GetUserId();
         await SavePrediction(userId, "text", request.Text.Length > 128 ? request.Text[..128] : request.Text, result);
@@ -59,7 +61,9 @@ public class PredictController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(503, new PredictionResponse($"ServiceUnavailable: {ex.GetType().Name}", 0f));
+            Console.WriteLine($"PredictImage error: {ex}");
+            var msg = string.IsNullOrWhiteSpace(ex.Message) ? ex.GetType().Name : $"{ex.GetType().Name}: {ex.Message}";
+            return StatusCode(503, new PredictionResponse($"ServiceUnavailable: {msg}", 0f));
         }
         var userId = GetUserId();
         await SavePrediction(userId, "image", file.FileName, result);

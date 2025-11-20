@@ -31,7 +31,17 @@ public class PythonPredictionClient : IPythonPredictionClient
     {
         var payload = new { text };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var resp = await _httpClient.PostAsync("/predict-text", content);
+        HttpResponseMessage resp;
+        try
+        {
+            resp = await _httpClient.PostAsync("/predict-text", content);
+        }
+        catch (HttpRequestException)
+        {
+            // Brief retry in case ML service is still warming up
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            resp = await _httpClient.PostAsync("/predict-text", content);
+        }
         resp.EnsureSuccessStatusCode();
         var json = await resp.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PredictionResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -44,7 +54,16 @@ public class PythonPredictionClient : IPythonPredictionClient
         var streamContent = new StreamContent(imageStream);
         streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         form.Add(streamContent, "file", fileName);
-        var resp = await _httpClient.PostAsync("/predict-image", form);
+        HttpResponseMessage resp;
+        try
+        {
+            resp = await _httpClient.PostAsync("/predict-image", form);
+        }
+        catch (HttpRequestException)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            resp = await _httpClient.PostAsync("/predict-image", form);
+        }
         resp.EnsureSuccessStatusCode();
         var json = await resp.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PredictionResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
