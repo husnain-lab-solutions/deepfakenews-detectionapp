@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#162035"/>
+      <stop offset="1" stop-color="#0b1221"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6847ff"/>
+      <stop offset="1" stop-color="#2cb9ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="520" rx="18" fill="url(#bg)"/>
+
+  <!-- cropping frame -->
+  <rect x="60" y="60" width="780" height="400" rx="14" fill="#0e1626" stroke="#2a3a55"/>
+
+  <!-- stylized face -->
+  <g transform="translate(280 120)">
+    <path d="M170 0c82 0 150 68 150 150v10c0 110-70 170-150 170S20 270 20 160v-10C20 70 88 0 170 0z" fill="#0f1a2b" stroke="#2a3a55"/>
+    <circle cx="125" cy="150" r="14" fill="#cbd5e1"/>
+    <circle cx="215" cy="150" r="14" fill="#cbd5e1"/>
+    <path d="M120 220c18 14 82 14 100 0" stroke="#a5b0c2" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- guide lines -->
+  <path d="M60 260h780" stroke="#1e2a3c"/>
+  <path d="M450 60v400" stroke="#1e2a3c"/>
+
+  <!-- label -->
+  <rect x="80" y="420" rx="10" width="280" height="34" fill="#101a2c" stroke="#2a3a55"/>
+  <text x="96" y="443" fill="#bcd3ff" font-family="Inter,Segoe UI,Arial" font-size="16">Face manipulation indicators</text>
+
+  <!-- gradient accent line -->
+  <path d="M80 98h220" stroke="url(#line)" stroke-width="6"/>
+</svg>

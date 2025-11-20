@@ -1,0 +1,94 @@
+name: Full Stack Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/ml_service/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Start ML Service (detached)
+        shell: pwsh
+        working-directory: ml_service
+        run: |
+          ./run_ml.ps1 -Detached
+          # Wait for health
+          $deadline=(Get-Date).AddSeconds(90)
+          $ok=$false
+          while((Get-Date)-lt $deadline){
+            try { $r=Invoke-RestMethod -Uri http://127.0.0.1:8000/health -TimeoutSec 5 -ErrorAction Stop; if($r.status -eq 'OK'){ $ok=$true; break } } catch {}
+            Start-Sleep 3
+          }
+          if(-not $ok){ Write-Host 'ML service not healthy in time' -ForegroundColor Red; Get-Content uvicorn.err.log -ErrorAction SilentlyContinue; exit 1 }
+
+      - name: Build Web App
+        shell: pwsh
+        working-directory: WebApplication1
+        run: |
+          dotnet build --configuration Debug
+
+      - name: Start Web App (background)
+        shell: pwsh
+        working-directory: WebApplication1
+        run: |
+          $proc = Start-Process -FilePath dotnet -ArgumentList 'run' -PassThru
+          # Wait for port 5140
+          $deadline=(Get-Date).AddSeconds(60)
+          while((Get-Date)-lt $deadline){
+            if(Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet){ break }
+            Start-Sleep 2
+          }
+          if(-not (Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet)){
+            Write-Host 'Web app failed to start' -ForegroundColor Red; exit 1
+          }
+          # Store PID for later
+          echo $proc.Id > ../webapp.pid
+
+      - name: Run Full Stack Verification
+        shell: pwsh
+        working-directory: scripts
+        run: |
+          ./verify_full_stack.ps1
+
+      - name: Show Summary Artifact
+        if: always()
+        shell: pwsh
+        working-directory: scripts
+        run: |
+          if(Test-Path sample_image.png){ Write-Host 'Sample image created.' }
+          Get-ChildItem -File | Select-Object Name,Length
+
+      - name: Stop Background Processes
+        if: always()
+        shell: pwsh
+        run: |
+          if(Test-Path webapp.pid){ $pid = Get-Content webapp.pid | Select-Object -First 1; try { Stop-Process -Id $pid -Force } catch {} }
+          # Stop ML service
+          cd ml_service
+          ./run_ml.ps1 -Stop || Write-Host 'ML stop attempted.'

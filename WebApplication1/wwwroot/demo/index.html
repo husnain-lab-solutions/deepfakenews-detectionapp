@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deepfake Demo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <style> body{padding:2rem} pre{white-space:pre-wrap} </style>
+</head>
+<body>
+  <h1>Deepfake News Detection (Demo)</h1>
+  <p class="text-muted">Use this simple page to register/login and test text/image predictions.</p>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">Auth</div>
+        <div class="card-body">
+          <div class="mb-2">
+            <label>Email</label>
+            <input id="email" class="form-control" value="test@example.com" />
+          </div>
+          <div class="mb-2">
+            <label>Password</label>
+            <input id="password" type="password" class="form-control" value="P@ssw0rd!" />
+          </div>
+          <div class="d-flex gap-2">
+            <button id="registerBtn" class="btn btn-outline-primary">Register</button>
+            <button id="loginBtn" class="btn btn-primary">Login</button>
+          </div>
+          <div class="mt-2 small">Token: <code id="tokenOut">(none)</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">Text Prediction</div>
+        <div class="card-body">
+          <textarea id="textInput" class="form-control" rows="5" placeholder="Paste news text..."></textarea>
+          <button id="predictTextBtn" class="btn btn-success mt-2">Predict Text</button>
+          <div class="mt-2"><strong>Result:</strong> <span id="textResult"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">Image Prediction</div>
+        <div class="card-body">
+          <input id="imageInput" type="file" accept="image/*" class="form-control" />
+          <button id="predictImageBtn" class="btn btn-success mt-2">Predict Image</button>
+          <div class="mt-2"><strong>Result:</strong> <span id="imageResult"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">History</div>
+    <div class="card-body">
+      <button id="loadHistoryBtn" class="btn btn-secondary">Load History</button>
+      <pre id="historyOut" class="mt-3"></pre>
+    </div>
+  </div>
+
+  <script>
+    const baseUrl = window.location.origin;
+    let token = null;
+
+    function setToken(t){ token = t; document.getElementById('tokenOut').textContent = token ? t.substring(0,24)+'...' : '(none)'; }
+
+    async function register(){
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const resp = await fetch(baseUrl + '/api/auth/register', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      if(!resp.ok){ alert('Register failed'); return; }
+      const data = await resp.json();
+      setToken(data.token);
+    }
+    async function login(){
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const resp = await fetch(baseUrl + '/api/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      if(!resp.ok){ alert('Login failed'); return; }
+      const data = await resp.json();
+      setToken(data.token);
+    }
+
+    async function predictText(){
+      if(!token){ alert('Login first'); return; }
+      const text = document.getElementById('textInput').value;
+      if(!text.trim()){ alert('Enter some text first'); return; }
+      const resultEl = document.getElementById('textResult');
+      resultEl.textContent = 'Processing...';
+      try {
+        const resp = await fetch(baseUrl + '/api/predict/text', {
+          method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body: JSON.stringify({ text })
+        });
+        if(!resp.ok){
+          const errBody = await resp.text();
+            throw new Error(`API ${resp.status}: ${errBody.substring(0,120)}`);
+        }
+        const data = await resp.json();
+        if(data && typeof data.confidence === 'number'){
+          resultEl.textContent = `${data.label} (${Math.round(data.confidence*100)}%)`;
+        } else {
+          resultEl.textContent = 'Unexpected response format';
+        }
+      } catch(e){
+        console.error('Text prediction failed', e);
+        resultEl.textContent = 'Error: ' + e.message;
+        alert('Text prediction failed: ' + e.message);
+      }
+    }
+
+    async function predictImage(){
+      if(!token){ alert('Login first'); return; }
+      const file = document.getElementById('imageInput').files[0];
+      if(!file){ alert('Choose an image'); return; }
+      const resultEl = document.getElementById('imageResult');
+      resultEl.textContent = 'Uploading...';
+      try {
+        const form = new FormData();
+        form.append('file', file);
+        const resp = await fetch(baseUrl + '/api/predict/image', {
+          method:'POST', headers: {'Authorization':'Bearer '+token}, body: form
+        });
+        if(!resp.ok){
+          const errBody = await resp.text();
+          throw new Error(`API ${resp.status}: ${errBody.substring(0,120)}`);
+        }
+        const data = await resp.json();
+        if(data && typeof data.confidence === 'number'){
+          resultEl.textContent = `${data.label} (${Math.round(data.confidence*100)}%)`;
+        } else {
+          resultEl.textContent = 'Unexpected response format';
+        }
+      } catch(e){
+        console.error('Image prediction failed', e);
+        resultEl.textContent = 'Error: ' + e.message;
+        alert('Image prediction failed: ' + e.message);
+      }
+    }
+
+    async function loadHistory(){
+      if(!token){ alert('Login first'); return; }
+      const outEl = document.getElementById('historyOut');
+      outEl.textContent = 'Loading...';
+      try {
+        const resp = await fetch(baseUrl + '/api/history', { headers:{'Authorization':'Bearer '+token} });
+        if(!resp.ok){
+          const errBody = await resp.text();
+          throw new Error(`API ${resp.status}: ${errBody.substring(0,120)}`);
+        }
+        const data = await resp.json();
+        outEl.textContent = JSON.stringify(data, null, 2);
+      } catch(e){
+        console.error('History load failed', e);
+        outEl.textContent = 'Error: ' + e.message;
+        alert('History load failed: ' + e.message);
+      }
+    }
+
+    document.getElementById('registerBtn').addEventListener('click', register);
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('predictTextBtn').addEventListener('click', predictText);
+    document.getElementById('predictImageBtn').addEventListener('click', predictImage);
+    document.getElementById('loadHistoryBtn').addEventListener('click', loadHistory);
+  </script>
+</body>
+</html>

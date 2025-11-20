@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520">
+  <defs>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141d31"/>
+      <stop offset="1" stop-color="#0b1221"/>
+    </linearGradient>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6847ff"/>
+      <stop offset="1" stop-color="#2cb9ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="520" rx="18" fill="url(#b)"/>
+
+  <!-- chip -->
+  <rect x="120" y="110" width="660" height="300" rx="18" fill="#0e1626" stroke="#2a3a55"/>
+  <g transform="translate(160 150)">
+    <rect x="0" y="0" width="580" height="220" rx="14" fill="#0b1426" stroke="#2a3a55"/>
+    <g stroke="#2a3a55" stroke-width="2" opacity=".9">
+      <rect x="24" y="24" width="220" height="60" rx="8" fill="#0e1626"/>
+      <rect x="24" y="100" width="320" height="20" rx="10" fill="#101a2c"/>
+      <rect x="24" y="140" width="280" height="20" rx="10" fill="#101a2c"/>
+      <rect x="370" y="38" width="170" height="20" rx="10" fill="#101a2c"/>
+    </g>
+  </g>
+
+  <!-- network -->
+  <g stroke="url(#a)" stroke-width="4" fill="none">
+    <circle cx="450" cy="265" r="84"/>
+    <path d="M450 181l0 168M366 265h168M390 220l120 90M510 220l-120 90"/>
+  </g>
+
+  <g fill="#cbd5e1">
+    <circle cx="450" cy="181" r="6"/>
+    <circle cx="450" cy="349" r="6"/>
+    <circle cx="366" cy="265" r="6"/>
+    <circle cx="534" cy="265" r="6"/>
+    <circle cx="390" cy="220" r="6"/>
+    <circle cx="510" cy="220" r="6"/>
+    <circle cx="390" cy="310" r="6"/>
+    <circle cx="510" cy="310" r="6"/>
+  </g>
+
+  <text x="140" y="445" fill="#8ea3c6" font-family="Inter,Segoe UI,Arial" font-size="16">Generative AI fingerprints and style consistency</text>
+</svg>

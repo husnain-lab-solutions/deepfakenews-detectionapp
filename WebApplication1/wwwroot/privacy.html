@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Privacy Policy • Deepfake News Detector</title>
+  <link rel="stylesheet" href="/css/styles.css?v=20251116" />
+</head>
+
+<body>
+  <header class="header">
+    <div class="container nav">
+      <a class="brand" href="/"><img class="logo-img" src="/img/logo.svg" alt="logo" /><span>Deepfake News
+          Detector</span></a>
+      <nav>
+        <a href="/predict.html">Predict</a>
+        <a href="/history.html" data-when="auth" style="display:none">History</a>
+        <a href="/why.html">Why?</a>
+        <a href="/help.html">Help</a>
+        <a href="/support.html">Contact</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/login.html" data-when="guest">Login</a>
+        <a href="/register.html" data-when="guest">Register</a>
+        <a href="#" id="logout-btn" data-when="auth" style="display:none">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container" style="max-width:1000px">
+      <h1>Privacy Policy</h1>
+      <p class="note">Effective date: <span id="pp-date"></span></p>
+
+      <div class="card">
+        <h3>Overview</h3>
+        <p>We take your privacy seriously. This policy explains what we collect, why we collect it, and how you can
+          control your information.</p>
+      </div>
+
+      <div class="grid cols-2 mt-3">
+        <div class="card">
+          <h3>What we collect</h3>
+          <ul>
+            <li>Account information: email, hashed credentials, and timestamps.</li>
+            <li>Prediction inputs: text snippets or image metadata (file names, sizes). Uploaded images are processed
+              transiently unless you save history.</li>
+            <li>Prediction results: labels, confidence, and timestamps stored in your private history.</li>
+            <li>Basic logs and diagnostics to keep the service reliable.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>How we use data</h3>
+          <ul>
+            <li>Provide predictions and show your private history.</li>
+            <li>Improve detection quality and stability in aggregate, without selling data.</li>
+            <li>Maintain security, prevent abuse, and meet legal requirements.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid cols-2 mt-3">
+        <div class="card">
+          <h3>Your controls</h3>
+          <ul>
+            <li>Export or delete your prediction history at any time.</li>
+            <li>Request correction or removal of your account information.</li>
+            <li>Opt out of non-essential analytics if enabled in the future.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Data retention</h3>
+          <p>We retain account data while your account is active. Prediction history is stored until you delete it.
+            Transient files are removed after processing unless explicitly saved.</p>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <h3>Contact</h3>
+        <p>If you have questions about this policy, please <a href="/support.html">contact us</a>.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© <span id="y"></span> Deepfake News Detector</div>
+  </footer>
+  <script>document.getElementById('y').textContent = new Date().getFullYear(); document.getElementById('pp-date').textContent = new Date().toLocaleDateString();</script>
+  <script src="/js/auth-guard.js?v=20251116"></script>
+  <script src="/js/app.js?v=20251116"></script>
+</body>
+
+</html>

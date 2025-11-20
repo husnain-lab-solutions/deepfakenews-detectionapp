@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Why this website • Deepfake News Detector</title>
+    <link rel="stylesheet" href="/css/styles.css?v=20251116" />
+</head>
+
+<body>
+    <header class="header">
+        <div class="container nav"><a class="brand" href="/"><img class="logo-img" src="/img/logo.svg"
+                    alt="logo" /><span>Deepfake News Detector</span></a>
+            <nav><a href="/predict.html">Predict</a><a href="/history.html" data-when="auth"
+                    style="display:none">History</a><a href="/why.html">Why?</a><a href="/help.html">Help</a><a
+                    href="/support.html">Support</a><a href="/login.html" data-when="guest">Login</a><a
+                    href="/register.html" data-when="guest">Register</a><a href="#" id="logout-btn" data-when="auth"
+                    style="display:none">Logout</a></nav>
+        </div>
+    </header>
+    <main class="section">
+        <div class="container" style="max-width:1000px">
+            <h1>Why this website?</h1>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>The challenge</h3>
+                    <p class="note">Manipulated media and misleading claims appear across social, messaging, and the
+                        open web—far beyond any single topic.</p>
+                </div>
+                <div class="card">
+                    <h3>Our approach</h3>
+                    <p class="note">A hybrid pipeline analyzes both text and images. Zero‑shot classification provides
+                        broad generalization; optional domain plugins boost accuracy where needed.</p>
+                </div>
+                <div class="card">
+                    <h3>Transparency</h3>
+                    <p class="note">We display labels and calibrated confidence. History is saved per account so you can
+                        review or export when needed.</p>
+                </div>
+            </div>
+            <div class="grid cols-3 mt-4" data-reveal>
+                <div class="card feature">
+                    <div class="icon">🔎</div>
+                    <div>
+                        <h3>Multi‑modal</h3>
+                        <p class="note">One place to screen text and images with consistent outputs.</p>
+                    </div>
+                </div>
+                <div class="card feature">
+                    <div class="icon">🧭</div>
+                    <div>
+                        <h3>Calibrated confidence</h3>
+                        <p class="note">Scores are constrained to avoid overconfidence in borderline cases.</p>
+                    </div>
+                </div>
+                <div class="card feature">
+                    <div class="icon">🛡️</div>
+                    <div>
+                        <h3>Privacy-first</h3>
+                        <p class="note">Your predictions are scoped to your account; delete or export anytime.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="container">© <span id="y"></span> Deepfake News Detector</div>
+    </footer>
+    <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+    <script src="/js/auth-guard.js?v=20251116"></script>
+    <script src="/js/app.js?v=20251116"></script>
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+# Build artifacts
+bin/
+obj/
+
+# Python virtual environments
+ml_service/.venv/
+
+# Python caches
+__pycache__/
+ml_service/__pycache__/
+
+# Logs and runtime files
+ml_service/uvicorn.out.log
+ml_service/uvicorn.err.log
+ml_service/uvicorn.pid
+
+# Local database
+deepfakenews.db
+
+# Model training runs (keep checkpoints selectively)
+ml_service/models/text-fakenews/runs/
+
+# Environment / secrets
+.env
+*.secret
+
+# Generated sample image
+scripts/sample_image.png
+
+# VS Code settings (optional uncomment)
+# .vscode/
+
+# User secrets are stored outside project by dotnet user-secrets

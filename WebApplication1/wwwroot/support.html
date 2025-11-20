@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Contact Us • Deepfake News Detector</title>
+    <link rel="stylesheet" href="/css/styles.css?v=20251116" />
+</head>
+
+<body>
+    <header class="header">
+        <div class="container nav"><a class="brand" href="/"><img class="logo-img" src="/img/logo.svg"
+                    alt="logo" /><span>Deepfake News Detector</span></a>
+            <nav><a href="/predict.html">Predict</a><a href="/history.html" data-when="auth"
+                    style="display:none">History</a><a href="/why.html">Why?</a><a href="/help.html">Help</a><a
+                    href="/support.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/login.html"
+                    data-when="guest">Login</a><a href="/register.html" data-when="guest">Register</a><a href="#"
+                    id="logout-btn" data-when="auth" style="display:none">Logout</a></nav>
+        </div>
+    </header>
+    <main class="section">
+        <div class="container" style="max-width:1000px">
+            <h1>Contact Us</h1>
+            <div class="grid cols-3">
+                <div class="card">
+                    <h3>Get in touch</h3>
+                    <p class="note">Email: <a
+                            href="mailto:hussnainxubair4555@gmail.com">hussnainxubair4555@gmail.com</a></p>
+                    <p class="note">LinkedIn: <a href="https://www.linkedin.com/in/hussnain-zubair" target="_blank"
+                            rel="noopener">Hussnain Zubair</a></p>
+                    <p class="note">Response time: 1–2 business days</p>
+                    <p class="note">For urgent issues, include steps to reproduce and any sample text or image.</p>
+                </div>
+                <div class="card">
+                    <h3>FAQ</h3>
+                    <ul>
+                        <li>Confidence is calibrated to a conservative range to avoid overclaiming.</li>
+                        <li>Labels depend on input clarity and model preset; ambiguity lowers confidence.</li>
+                        <li>History is private per account. You can clear or export it anytime.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Best practices</h3>
+                    <ul>
+                        <li>Use specific, self‑contained text inputs.</li>
+                        <li>Prefer original (uncompressed) images.</li>
+                        <li>Run the ML service with the preset closest to your content.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="container">© <span id="y"></span> Deepfake News Detector</div>
+    </footer>
+    <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+    <script src="/js/auth-guard.js?v=20251116"></script>
+    <script src="/js/app.js?v=20251116"></script>
+</body>
+
+</html>

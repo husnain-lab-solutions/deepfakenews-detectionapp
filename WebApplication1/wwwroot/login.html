@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login • Deepfake News Detector</title>
+    <link rel="stylesheet" href="/css/styles.css?v=20251116" />
+    <style>
+        .header nav {
+            display: none !important
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container nav"><a class="brand" href="/"><img class="logo-img" src="/img/logo.svg"
+                    alt="Deepfake News Detector logo" /><span>Deepfake News Detector</span></a>
+            <nav><a href="/predict.html">Predict</a><a href="/history.html" data-when="auth"
+                    style="display:none">History</a><a href="/why.html">Why?</a><a href="/help.html">Help</a><a
+                    href="/support.html">Support</a><a href="/login.html" data-when="guest">Login</a><a
+                    href="/register.html" data-when="guest">Register</a><a href="#" id="logout-btn" data-when="auth"
+                    style="display:none">Logout</a></nav>
+        </div>
+    </header>
+    <main class="section">
+        <div class="container" style="max-width:520px">
+            <h1>Welcome back</h1>
+            <p class="note">Use your email and password to continue.</p>
+            <div id="login-error"></div>
+            <form id="login-form" class="card">
+                <div class="form-row"><label>Email</label><input id="login-email" class="input" type="email" required />
+                </div>
+                <div class="form-row"><label>Password</label><input id="login-password" class="input" type="password"
+                        required /></div>
+                <div class="form-actions"><button class="btn primary" type="submit">Login</button><a class="btn"
+                        href="/register.html">Create an account</a></div>
+            </form>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="container">© <span id="y"></span> Deepfake News Detector</div>
+    </footer>
+    <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+    <script src="/js/app.js?v=20251116"></script>
+</body>
+
+</html>

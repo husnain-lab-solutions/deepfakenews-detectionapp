@@ -1,0 +1,10 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.0
+pillow==11.0.0
+# Optional heavy deps; comment out if not needed for quick demo
+transformers==4.46.3
+torch>=2.3.0; platform_system != 'Windows' or platform_machine != 'ARM64'
+datasets==2.19.0
+evaluate==0.4.1
+scikit-learn==1.5.2
+accelerate>=0.26.0

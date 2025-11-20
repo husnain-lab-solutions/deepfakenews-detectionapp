@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Deepfake News Detector</title>
+	<link rel="stylesheet" href="/css/styles.css?v=20251116" />
+	<script src="/js/auth-guard.js?v=20251116"></script>
+</head>
+
+<body>
+	<header class="header">
+		<div class="container nav">
+			<a class="brand" href="/"><img class="logo-img" src="/img/logo.svg"
+					alt="Deepfake News Detector logo" /><span>Deepfake News Detector</span></a>
+			<nav>
+				<a href="/deepfake-detection.html">Solutions</a>
+				<a href="/predict.html">Predict</a>
+				<a href="/history.html" data-when="auth" style="display:none">History</a>
+				<a href="/why.html">Why?</a>
+				<a href="/help.html">Help</a>
+				<a href="/support.html">Contact</a>
+				<a href="/privacy.html">Privacy</a>
+				<a href="/login.html" data-when="guest">Login</a>
+				<a href="/register.html" data-when="guest">Register</a>
+				<a href="#" id="logout-btn" data-when="auth" style="display:none">Logout</a>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<section class="hero">
+			<div class="container">
+				<div class="badge">AI-powered media and claim analysis</div>
+				<h1 class="title">🤖 Deepfake Detection Platform</h1>
+				<p class="subtitle max-w-lg">Fight misinformation using AI-powered text, image, and video verification.
+				</p>
+				<div class="cta-row">
+					<a class="btn primary" href="/login.html">Get Started</a>
+					<a class="btn ghost" href="/why.html">Learn how it works</a>
+				</div>
+			</div>
+		</section>
+
+		<section class="section" data-reveal>
+			<div class="container">
+				<h2 style="margin-bottom:12px">What you can do</h2>
+				<div class="grid cols-3">
+					<div class="card">
+						<h3>Verify content</h3>
+						<p class="note">Screen text, images, and more with consistent Real/Fake labels and calibrated
+							confidence.</p>
+					</div>
+					<div class="card">
+						<h3>How it works</h3>
+						<ul class="list">
+							<li>1) Submit text or an image</li>
+							<li>2) Hybrid AI analyzes the content</li>
+							<li>3) Review label + confidence and your history</li>
+						</ul>
+					</div>
+					<div class="card">
+						<h3>Privacy & security</h3>
+						<p class="note">Predictions are scoped to your account. You control your history—export or
+							delete anytime.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Understanding Deepfake Detection -->
+		<section class="section" data-reveal>
+			<div class="container">
+				<h2>Understanding Deepfake Detection</h2>
+				<p class="lead">The most comprehensive detection capabilities</p>
+				<div class="media mt-3">
+					<div>
+						<div class="card">
+							<h3 class="mb-2">A multi‑layered approach</h3>
+							<ul class="list">
+								<li>Cross‑modal analysis across text and images for stronger signals</li>
+								<li>Model calibration for interpretable confidence, not just a score</li>
+								<li>Continuous evaluation and drift monitoring to maintain accuracy</li>
+								<li>Private prediction history with export and deletion controls</li>
+							</ul>
+						</div>
+					</div>
+					<div class="illustration">
+						<img src="/img/detection.svg" alt="Illustration of multilayer deepfake detection"
+							loading="lazy" />
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Detection Pillars: Face / Generative AI / Voice -->
+		<section class="section" data-reveal>
+			<div class="container">
+				<h2>Detection pillars</h2>
+				<div class="feature-grid mt-3">
+					<div class="card feature-card">
+						<div class="thumb"><img src="/img/face.svg" alt="Face manipulation detection" loading="lazy" />
+						</div>
+						<h3>Face Manipulation</h3>
+						<p class="note">Spot face swaps, re‑enactments, and inpainting artifacts with forensic visual
+							cues.</p>
+					</div>
+					<div class="card feature-card">
+						<div class="thumb"><img src="/img/genai.svg" alt="Generative AI detection" loading="lazy" />
+						</div>
+						<h3>Generative AI</h3>
+						<p class="note">Identify synthetic content and style consistency from diffusion and LLM
+							pipelines.</p>
+					</div>
+					<div class="card feature-card">
+						<div class="thumb"><img src="/img/voice.svg" alt="Voice cloning detection" loading="lazy" />
+						</div>
+						<h3>Voice Cloning</h3>
+						<p class="note">Flag cloned speech and mismatched prosody using spectrogram‑level heuristics.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Use cases -->
+		<section class="section" data-reveal>
+			<div class="container">
+				<h2>Use cases</h2>
+				<p class="lead">Built for your use case</p>
+				<div class="usecase-grid mt-3">
+					<div class="card usecase-card">
+						<h3><span class="icon">📰</span>Journalism & Newsrooms</h3>
+						<p class="note">Triage tips and media for authenticity before publication.</p>
+					</div>
+					<div class="card usecase-card">
+						<h3><span class="icon">💬</span>Social & Messaging</h3>
+						<p class="note">Moderate harmful fakes at scale across user‑generated content.</p>
+					</div>
+					<div class="card usecase-card">
+						<h3><span class="icon">🏛️</span>Public Sector</h3>
+						<p class="note">Rapidly assess incident media during information operations.</p>
+					</div>
+					<div class="card usecase-card">
+						<h3><span class="icon">🎓</span>Education & Research</h3>
+						<p class="note">Teach media literacy and run controlled experiments safely.</p>
+					</div>
+					<div class="card usecase-card">
+						<h3><span class="icon">🏢</span>Enterprise Security</h3>
+						<p class="note">Protect brands and executives against impersonation attempts.</p>
+					</div>
+					<div class="card usecase-card">
+						<h3><span class="icon">⚖️</span>Investigations</h3>
+						<p class="note">Support forensic workflows with consistent, traceable labels.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="section" data-reveal>
+			<div class="container">
+				<div class="badge">Trusted by</div>
+				<div class="grid cols-3 mt-3">
+					<div class="card center" style="min-height:70px">Organization A</div>
+					<div class="card center" style="min-height:70px">Organization B</div>
+					<div class="card center" style="min-height:70px">Organization C</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="footer">
+		<div class="container">© <span id="y"></span> Deepfake News Detector • <a href="/support.html">Contact
+				Support</a></div>
+	</footer>
+	<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+	<script src="/js/app.js?v=20251116"></script>
+</body>
+
+</html>

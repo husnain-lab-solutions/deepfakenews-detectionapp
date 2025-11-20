@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520">
+  <defs>
+    <linearGradient id="bgv" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#132036"/>
+      <stop offset="1" stop-color="#0b1221"/>
+    </linearGradient>
+    <linearGradient id="linev" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6847ff"/>
+      <stop offset="1" stop-color="#2cb9ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="520" rx="18" fill="url(#bgv)"/>
+
+  <!-- waveform -->
+  <g transform="translate(120 220)" stroke="url(#linev)" stroke-width="6" stroke-linecap="round">
+    <path d="M0 40v-20M24 40v-30M48 40v-45M72 40v-60M96 40v-70M120 40v-78M144 40v-84M168 40v-90M192 40v-95M216 40v-100M240 40v-105M264 40v-110M288 40v-112M312 40v-114M336 40v-112M360 40v-110M384 40v-105M408 40v-98M432 40v-90M456 40v-80M480 40v-70M504 40v-55M528 40v-40M552 40v-28M576 40v-18"/>
+  </g>
+
+  <!-- mic icon -->
+  <g transform="translate(680 120)">
+    <rect x="-26" y="0" width="52" height="90" rx="26" fill="#0e1626" stroke="#2a3a55"/>
+    <rect x="-12" y="92" width="24" height="36" rx="12" fill="#0e1626" stroke="#2a3a55"/>
+    <rect x="-40" y="118" width="80" height="16" rx="8" fill="#0e1626" stroke="#2a3a55"/>
+  </g>
+
+  <text x="120" y="430" fill="#8ea3c6" font-family="Inter,Segoe UI,Arial" font-size="16">Prosody and spectrogram‑level heuristics for cloning signals</text>
+</svg>

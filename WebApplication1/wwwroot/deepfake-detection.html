@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deepfake Detection • Deepfake News Detector</title>
+  <link rel="stylesheet" href="/css/styles.css?v=20251116" />
+</head>
+
+<body>
+  <header class="header">
+    <div class="container nav">
+      <a class="brand" href="/"><img class="logo-img" src="/img/logo.svg"
+          alt="Deepfake News Detector logo" /><span>Deepfake News Detector</span></a>
+      <nav>
+        <a href="/deepfake-detection.html">Solutions</a>
+        <a href="/predict.html">Predict</a>
+        <a href="/history.html" data-when="auth" style="display:none">History</a>
+        <a href="/why.html">Why?</a>
+        <a href="/help.html">Help</a>
+        <a href="/support.html">Support</a>
+        <a href="/login.html" data-when="guest">Login</a>
+        <a href="/register.html" data-when="guest">Register</a>
+        <a href="#" id="logout-btn" data-when="auth" style="display:none">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="badge">Solution</div>
+        <h1 class="title">Detect manipulated media and misleading claims</h1>
+        <p class="subtitle">A unified workflow for screening text and images. Submit content, receive a Real/Fake label
+          with calibrated confidence, and review the full history per account.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="/predict.html">Try it now</a>
+          <a class="btn ghost" href="/help.html">Read the guide</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container grid cols-3">
+        <div class="card feature">
+          <div class="icon">🧠</div>
+          <div>
+            <h3>Hybrid AI</h3>
+            <p class="note">Zero‑shot for broad coverage and a plug‑in classifier for domains where a dedicated model is
+              available.</p>
+          </div>
+        </div>
+        <div class="card feature">
+          <div class="icon">⚡</div>
+          <div>
+            <h3>Fast API</h3>
+            <p class="note">Simple REST interface for text and image screening, built on FastAPI + ASP.NET Core.</p>
+          </div>
+        </div>
+        <div class="card feature">
+          <div class="icon">🔒</div>
+          <div>
+            <h3>Account‑scoped history</h3>
+            <p class="note">Each user keeps a private timeline of predictions. Export or clear anytime.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>How it works</h2>
+        <div class="grid cols-3" style="margin-top:14px">
+          <div class="card">
+            <h3>1. Submit</h3>
+            <p class="note">Paste a claim or upload an image from the Predict page or via API.</p>
+          </div>
+          <div class="card">
+            <h3>2. Analyze</h3>
+            <p class="note">The service evaluates the content and calibrates confidence to a conservative range.</p>
+          </div>
+          <div class="card">
+            <h3>3. Review</h3>
+            <p class="note">See the label (Real/Fake) and confidence. View and manage your history.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Use cases</h2>
+        <div class="grid cols-3" style="margin-top:14px">
+          <div class="card">
+            <h3>Political content</h3>
+            <p class="note">Screen claims around elections and public statements.</p>
+          </div>
+          <div class="card">
+            <h3>Health claims</h3>
+            <p class="note">Identify misleading headlines and miracle‑cure narratives.</p>
+          </div>
+          <div class="card">
+            <h3>Sports</h3>
+            <p class="note">Flag exaggerated match reports and viral rumors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Get started</h2>
+        <div class="grid cols-2" style="margin-top:14px">
+          <div class="card price-card">
+            <h3>Interactive</h3>
+            <div class="price">Free</div>
+            <ul class="list">
+              <li>Web UI for text & image</li>
+              <li>Private history</li>
+              <li>Swagger API docs</li>
+            </ul>
+            <div class="form-actions" style="margin-top:12px">
+              <a class="btn primary" href="/register.html">Create account</a>
+            </div>
+          </div>
+          <div class="card price-card">
+            <h3>API</h3>
+            <div class="price">Free (local)</div>
+            <ul class="list">
+              <li>REST: /api/predict/text</li>
+              <li>REST: /api/predict/image</li>
+              <li>JWT authentication</li>
+            </ul>
+            <div class="form-actions" style="margin-top:12px">
+              <a class="btn" href="/swagger">Open Swagger</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© <span id="y"></span> Deepfake News Detector</div>
+  </footer>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+  <script src="/js/auth-guard.js?v=20251116"></script>
+  <script src="/js/app.js?v=20251116"></script>
+</body>
+
+</html>
