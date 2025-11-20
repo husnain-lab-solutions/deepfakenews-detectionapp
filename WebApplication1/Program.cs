@@ -28,6 +28,14 @@ builder.Services.AddHttpClient<IPythonPredictionClient, PythonPredictionClient>(
 });
 
 var jwtSection = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+// Allow overriding JWT key via environment variable JWT_KEY (for CI/secrets)
+var envJwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+if (!string.IsNullOrWhiteSpace(envJwtKey) && jwtSection != null)
+{
+    jwtSection.Key = envJwtKey;
+    // Ensure IOptions<JwtOptions> seen by JwtTokenService also reflects override
+    builder.Services.PostConfigure<JwtOptions>(opts => opts.Key = envJwtKey);
+}
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection!.Key));
 
 builder.Services.AddAuthentication(options =>

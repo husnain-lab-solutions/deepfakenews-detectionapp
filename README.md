@@ -25,6 +25,34 @@ This milestone delivers a functional backend API with authentication, prediction
 - .NET SDK 9.0
 - Python 3.10+
 
+## Secrets (JWT Key)
+
+Do NOT commit a real JWT signing key. The `appsettings.json` contains a placeholder. Provide the key at runtime via environment variable `JWT_KEY` (preferred) or user-secrets for local development.
+
+### Local (user-secrets)
+```powershell
+cd WebApplication1
+dotnet user-secrets init
+$secret = [Guid]::NewGuid().ToString('N') + [Convert]::ToBase64String((New-Object byte[] 32))
+dotnet user-secrets set "Jwt:Key" "$secret"
+```
+This populates a secure store outside the repository.
+
+### Local (environment override)
+```powershell
+$env:JWT_KEY = (python - <<'PY'
+import secrets, base64
+print(base64.urlsafe_b64encode(secrets.token_bytes(64)).decode())
+PY
+)
+dotnet run --project .\WebApplication1\WebApplication1.csproj
+```
+
+### GitHub Actions
+Add repository secret `JWT_KEY` then workflow injects it automatically (`env: JWT_KEY`).
+
+Program logic: if `JWT_KEY` env var is set, it overrides the configuration key before token validation setup.
+
 ## Run the ML microservice
 
 ```powershell
