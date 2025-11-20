@@ -1,11 +1,11 @@
 name: Full Stack Verification
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   push:
-      - name: Checkout (with LFS)
-        uses: actions/checkout@v4
-        with:
-          lfs: true
     branches: [ main ]
   pull_request:
     branches: [ main ]
@@ -18,8 +18,10 @@ jobs:
       JWT_KEY: ${{ secrets.JWT_KEY }}
     timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Checkout (with LFS)
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -64,7 +66,7 @@ jobs:
             try { $r=Invoke-RestMethod -Uri http://127.0.0.1:8000/health -TimeoutSec 5 -ErrorAction Stop; if($r.status -eq 'OK'){ $ok=$true; break } } catch {}
             Start-Sleep 3
           }
-          if(-not $ok){ Write-Host 'ML service not healthy in time' -ForegroundColor Red; Get-Content uvicorn.err.log -ErrorAction SilentlyContinue; exit 1 }
+          if(-not $ok){ Write-Host 'ML service not healthy in time' -ForegroundColor Red; Get-Content uvicorn.err.log -ErrorAction SilentlyContinue; Get-Content uvicorn.out.log -ErrorAction SilentlyContinue; exit 1 }
 
       - name: Build Web App
         shell: pwsh
@@ -97,9 +99,6 @@ jobs:
 
       - name: Show Summary Artifact
         if: always()
-        permissions:
-          contents: read
-          actions: write
         shell: pwsh
         working-directory: scripts
         run: |
