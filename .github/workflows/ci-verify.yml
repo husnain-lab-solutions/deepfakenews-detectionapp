@@ -97,6 +97,9 @@ jobs:
 
       - name: Show Summary Artifact
         if: always()
+        permissions:
+          contents: read
+          actions: write
         shell: pwsh
         working-directory: scripts
         run: |
