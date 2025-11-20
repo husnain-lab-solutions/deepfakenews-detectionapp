@@ -109,7 +109,8 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          if(Test-Path webapp.pid){ $pid = Get-Content webapp.pid | Select-Object -First 1; try { Stop-Process -Id $pid -Force } catch {} }
+          # Use a non-reserved variable name; $PID is an automatic variable
+          if(Test-Path webapp.pid){ $webAppPid = Get-Content webapp.pid | Select-Object -First 1; try { Stop-Process -Id $webAppPid -Force -ErrorAction SilentlyContinue } catch {} }
           # Stop ML service
           cd ml_service
           ./run_ml.ps1 -Stop || Write-Host 'ML stop attempted.'
