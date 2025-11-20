@@ -11,7 +11,8 @@ param(
     [switch]$AllowDownloads,         # Allow model downloads (set HF_ALLOW_DOWNLOADS=1)
     [string]$ZeroShotTemplate = "", # Optional override for zero-shot hypothesis template
     [string]$ZeroShotLabels = "",   # Optional comma-separated labels for zero-shot (e.g., "fake,real")
-    [int]$WaitHealthSeconds = 90     # When -NewWindow, wait up to N seconds for /health
+    [int]$WaitHealthSeconds = 90,     # When -NewWindow or -Detached, wait up to N seconds for /health
+    [switch]$Fast                     # Fast mode: install only minimal deps for CI (skip heavy ML libs)
 )
 
 $ErrorActionPreference = 'Stop'
@@ -40,16 +41,31 @@ try {
     }
     . .\.venv\Scripts\Activate.ps1
 
-    Write-Host "Ensuring required packages from requirements.txt ..." -ForegroundColor Cyan
+    if ($Fast) {
+        Write-Host "FAST MODE enabled: installing minimal runtime dependencies only." -ForegroundColor Yellow
+    }
+    Write-Host "Ensuring required packages ..." -ForegroundColor Cyan
     python -m pip install --upgrade pip | Out-Null
-    if (Test-Path .\requirements.txt) {
-        python -m pip install -r requirements.txt | Out-Null
+    if ($Fast) {
+        # Minimal packages needed for current endpoints (no transformers / torch)
+        python -m pip install fastapi uvicorn pillow python-multipart | Out-Null
     }
     else {
-        python -m pip install uvicorn fastapi pillow transformers | Out-Null
+        if (Test-Path .\requirements.txt) {
+            python -m pip install -r requirements.txt | Out-Null
+        }
+        else {
+            python -m pip install uvicorn fastapi pillow transformers torch python-multipart | Out-Null
+        }
     }
 
-    if ($UseHF) {
+    if ($Fast) {
+        # Force heuristic / lightweight paths in fast CI
+        $env:USE_HF = '0'
+        $env:HF_ALLOW_DOWNLOADS = '0'
+        Write-Host "FAST MODE: disabling HuggingFace models (USE_HF=0)." -ForegroundColor Yellow
+    }
+    elseif ($UseHF) {
         Write-Host "Enabling HuggingFace models (USE_HF=1). Ensure internet access and cached models." -ForegroundColor Yellow
         $env:USE_HF = '1'
     }

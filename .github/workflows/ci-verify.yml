@@ -58,7 +58,7 @@ jobs:
         shell: pwsh
         working-directory: ml_service
         run: |
-          ./run_ml.ps1 -Detached
+          ./run_ml.ps1 -Detached -Fast -WaitHealthSeconds 120
           # Wait for health
           $deadline=(Get-Date).AddSeconds(90)
           $ok=$false
