@@ -1,6 +1,8 @@
 fastapi==0.115.5
 uvicorn[standard]==0.32.0
 pillow==11.0.0
+# Needed for multipart/form-data (image upload) endpoint
+python-multipart==0.0.9
 # Optional heavy deps; comment out if not needed for quick demo
 transformers==4.46.3
 torch>=2.3.0; platform_system != 'Windows' or platform_machine != 'ARM64'

@@ -2,6 +2,10 @@ name: Full Stack Verification
 
 on:
   push:
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
     branches: [ main ]
   pull_request:
     branches: [ main ]
@@ -34,6 +38,19 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/ml_service/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
+      - name: Ensure JWT_KEY (fallback if secret missing)
+        shell: pwsh
+        run: |
+          if(-not $env:JWT_KEY -or $env:JWT_KEY.Trim().Length -lt 16){
+            $rng=[System.Security.Cryptography.RandomNumberGenerator]::Create();
+            $b=New-Object byte[] 32; $rng.GetBytes($b);
+            $k=[Convert]::ToBase64String($b);
+            echo "JWT_KEY=$k" >> $env:GITHUB_ENV
+            Write-Host 'JWT_KEY generated for this run.'
+          } else {
+            Write-Host 'JWT_KEY loaded from repository secret.'
+          }
 
       - name: Start ML Service (detached)
         shell: pwsh
