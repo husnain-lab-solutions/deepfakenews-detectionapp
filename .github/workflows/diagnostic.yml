@@ -1,0 +1,22 @@
+name: Diagnostic
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  echo:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Show repo info
+        run: |
+          echo "Branch: $GITHUB_REF"
+          echo "SHA: $GITHUB_SHA"
+          echo "Actor: $GITHUB_ACTOR"
+      - name: List workflow files
+        run: |
+          echo "Workflow files present:";
+          ls .github/workflows
