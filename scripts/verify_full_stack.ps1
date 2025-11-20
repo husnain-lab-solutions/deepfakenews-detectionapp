@@ -77,7 +77,17 @@ Write-Host ("User Identity: {0}" -f (($me | ConvertTo-Json -Compress))) -Foregro
 
 Write-Host "[5/7] Predicting via Web API /api/predict/text ..." -ForegroundColor Cyan
 $predBody = @{ text = $SampleText } | ConvertTo-Json -Compress
-$apiPred = Invoke-RestMethod -Method Post -Uri "$WebUrl/api/predict/text" -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json' -Body $predBody -TimeoutSec 30
+$apiPred = $null
+for($attempt=1; $attempt -le 5; $attempt++) {
+    try {
+        $apiPred = Invoke-RestMethod -Method Post -Uri "$WebUrl/api/predict/text" -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json' -Body $predBody -TimeoutSec 30
+        break
+    } catch {
+        Write-Host "Attempt $attempt failed: $($_.Exception.Message)" -ForegroundColor DarkYellow
+        if($attempt -lt 5){ Start-Sleep -Seconds ($attempt * 2) }
+    }
+}
+if(-not $apiPred){ throw "Web API prediction failed after retries" }
 $apiPredJson = $apiPred | ConvertTo-Json -Compress
 Write-Host "Web API Prediction: $apiPredJson" -ForegroundColor Yellow
 

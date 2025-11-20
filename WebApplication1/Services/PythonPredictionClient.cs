@@ -21,6 +21,36 @@ public class PythonPredictionClient : IPythonPredictionClient
 {
     private readonly HttpClient _httpClient;
 
+    private async Task<HttpResponseMessage> PostWithRetriesAsync(string path, HttpContent content, int maxAttempts = 5, int initialDelayMs = 500)
+    {
+        Exception? lastEx = null;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                var resp = await _httpClient.PostAsync(path, content);
+                return resp; // May still be non-success; caller will EnsureSuccessStatusCode()
+            }
+            catch (HttpRequestException ex)
+            {
+                lastEx = ex;
+                // Brief health probe before next retry (except final attempt)
+                if (attempt < maxAttempts)
+                {
+                    try
+                    {
+                        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+                        using var healthResp = await _httpClient.GetAsync("/health", cts.Token);
+                        // If health succeeds we still retry the original POST immediately
+                    }
+                    catch { }
+                    await Task.Delay(initialDelayMs * attempt); // Linear backoff
+                }
+            }
+        }
+        throw lastEx ?? new HttpRequestException("Unknown connection failure to ML service.");
+    }
+
     public PythonPredictionClient(HttpClient httpClient, IOptions<PythonServiceOptions> opts)
     {
         _httpClient = httpClient;
@@ -31,17 +61,7 @@ public class PythonPredictionClient : IPythonPredictionClient
     {
         var payload = new { text };
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        HttpResponseMessage resp;
-        try
-        {
-            resp = await _httpClient.PostAsync("/predict-text", content);
-        }
-        catch (HttpRequestException)
-        {
-            // Brief retry in case ML service is still warming up
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            resp = await _httpClient.PostAsync("/predict-text", content);
-        }
+        var resp = await PostWithRetriesAsync("/predict-text", content);
         resp.EnsureSuccessStatusCode();
         var json = await resp.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PredictionResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -54,16 +74,7 @@ public class PythonPredictionClient : IPythonPredictionClient
         var streamContent = new StreamContent(imageStream);
         streamContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         form.Add(streamContent, "file", fileName);
-        HttpResponseMessage resp;
-        try
-        {
-            resp = await _httpClient.PostAsync("/predict-image", form);
-        }
-        catch (HttpRequestException)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            resp = await _httpClient.PostAsync("/predict-image", form);
-        }
+        var resp = await PostWithRetriesAsync("/predict-image", form);
         resp.EnsureSuccessStatusCode();
         var json = await resp.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<PredictionResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
