@@ -79,24 +79,27 @@ Write-Host "[5/7] Predicting via Web API /api/predict/text ..." -ForegroundColor
 $predBody = @{ text = $SampleText } | ConvertTo-Json -Compress
 $apiPred = $null
 for($attempt=1; $attempt -le 5; $attempt++) {
+    $resp = $null
     try {
-        $apiPred = Invoke-RestMethod -Method Post -Uri "$WebUrl/api/predict/text" -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json' -Body $predBody -TimeoutSec 30
-        break
+        # Use Invoke-WebRequest with -SkipHttpErrorCheck so we can inspect body on non-2xx
+        $resp = Invoke-WebRequest -SkipHttpErrorCheck -Method Post -Uri "$WebUrl/api/predict/text" -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json' -Body $predBody -TimeoutSec 40
     } catch {
-        Write-Host "Attempt $attempt failed: $($_.Exception.Message)" -ForegroundColor DarkYellow
-        try {
-            $resp = $_.Exception.Response
-            if($resp){
-                $stream = $resp.GetResponseStream()
-                if($stream){
-                    $reader = New-Object IO.StreamReader($stream)
-                    $body = $reader.ReadToEnd()
-                    if($body){ Write-Host "Attempt $attempt response body: $body" -ForegroundColor DarkYellow }
-                }
-            }
-        } catch {}
-        if($attempt -lt 5){ Start-Sleep -Seconds ($attempt * 2) }
+        Write-Host "Attempt $attempt transport error: $($_.Exception.Message)" -ForegroundColor DarkYellow
     }
+    if($resp) {
+        $status = [int]$resp.StatusCode
+        $content = $resp.Content
+        if($status -ge 200 -and $status -lt 300) {
+            try { $apiPred = $content | ConvertFrom-Json } catch { Write-Host "Attempt $attempt JSON parse failed: $($_.Exception.Message)" -ForegroundColor Red }
+            if($apiPred){ Write-Host "Attempt $attempt succeeded (status $status)." -ForegroundColor Green; break }
+        } else {
+            $trunc = if($content.Length -gt 500){ $content.Substring(0,500) + '...' } else { $content }
+            Write-Host "Attempt $attempt non-success status $status. Body: $trunc" -ForegroundColor DarkYellow
+        }
+    } else {
+        Write-Host "Attempt $attempt produced no response object." -ForegroundColor DarkYellow
+    }
+    if(-not $apiPred -and $attempt -lt 5){ Start-Sleep -Seconds ($attempt * 2) }
 }
 if(-not $apiPred){ throw "Web API prediction failed after retries" }
 $apiPredJson = $apiPred | ConvertTo-Json -Compress
