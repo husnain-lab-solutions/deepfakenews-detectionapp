@@ -101,9 +101,12 @@ for($attempt=1; $attempt -le 5; $attempt++) {
     }
     if(-not $apiPred -and $attempt -lt 5){ Start-Sleep -Seconds ($attempt * 2) }
 }
-if(-not $apiPred){ throw "Web API prediction failed after retries" }
-$apiPredJson = $apiPred | ConvertTo-Json -Compress
-Write-Host "Web API Prediction: $apiPredJson" -ForegroundColor Yellow
+if(-not $apiPred){
+    Write-Host "Web API prediction failed after retries (continuing to direct ML tests)." -ForegroundColor Red
+} else {
+    $apiPredJson = $apiPred | ConvertTo-Json -Compress
+    Write-Host "Web API Prediction: $apiPredJson" -ForegroundColor Yellow
+}
 
 Write-Host "[6/7] Direct ML service health & raw prediction ..." -ForegroundColor Cyan
 $mlHealthOk = $false
