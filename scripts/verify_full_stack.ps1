@@ -84,6 +84,17 @@ for($attempt=1; $attempt -le 5; $attempt++) {
         break
     } catch {
         Write-Host "Attempt $attempt failed: $($_.Exception.Message)" -ForegroundColor DarkYellow
+        try {
+            $resp = $_.Exception.Response
+            if($resp){
+                $stream = $resp.GetResponseStream()
+                if($stream){
+                    $reader = New-Object IO.StreamReader($stream)
+                    $body = $reader.ReadToEnd()
+                    if($body){ Write-Host "Attempt $attempt response body: $body" -ForegroundColor DarkYellow }
+                }
+            }
+        } catch {}
         if($attempt -lt 5){ Start-Sleep -Seconds ($attempt * 2) }
     }
 }
