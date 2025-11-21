@@ -59,14 +59,18 @@ jobs:
         working-directory: ml_service
         run: |
           ./run_ml.ps1 -Detached -Fast -WaitHealthSeconds 120
-          # Wait for health
-          $deadline=(Get-Date).AddSeconds(90)
+          Write-Host '--- initial uvicorn.err.log (first 40 lines) ---'
+          Get-Content uvicorn.err.log -ErrorAction SilentlyContinue | Select-Object -First 40
+          Write-Host '--- initial uvicorn.out.log (first 40 lines) ---'
+          Get-Content uvicorn.out.log -ErrorAction SilentlyContinue | Select-Object -First 40
+          # Wait for health (extended)
+          $deadline=(Get-Date).AddSeconds(120)
           $ok=$false
           while((Get-Date)-lt $deadline){
             try { $r=Invoke-RestMethod -Uri http://127.0.0.1:8000/health -TimeoutSec 5 -ErrorAction Stop; if($r.status -eq 'OK'){ $ok=$true; break } } catch {}
             Start-Sleep 3
           }
-          if(-not $ok){ Write-Host 'ML service not healthy in time' -ForegroundColor Red; Get-Content uvicorn.err.log -ErrorAction SilentlyContinue; Get-Content uvicorn.out.log -ErrorAction SilentlyContinue; exit 1 }
+          if(-not $ok){ Write-Host 'ML service not healthy in time' -ForegroundColor Red; Write-Host '--- uvicorn.err.log tail ---'; Get-Content uvicorn.err.log -ErrorAction SilentlyContinue; Write-Host '--- uvicorn.out.log tail ---'; Get-Content uvicorn.out.log -ErrorAction SilentlyContinue; exit 1 }
 
       - name: Build Web App
         shell: pwsh
@@ -78,17 +82,17 @@ jobs:
         shell: pwsh
         working-directory: WebApplication1
         run: |
-          $proc = Start-Process -FilePath dotnet -ArgumentList 'run' -PassThru
-          # Wait for port 5140
-          $deadline=(Get-Date).AddSeconds(60)
+          $env:ASPNETCORE_URLS = 'http://localhost:5140'
+          $proc = Start-Process -FilePath dotnet -ArgumentList 'run --no-launch-profile' -PassThru
+          $deadline=(Get-Date).AddSeconds(90)
           while((Get-Date)-lt $deadline){
             if(Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet){ break }
             Start-Sleep 2
           }
           if(-not (Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet)){
-            Write-Host 'Web app failed to start' -ForegroundColor Red; exit 1
+            Write-Host 'Web app failed to start (port 5140 not open)' -ForegroundColor Red; Get-Process -Name WebApplication1 -ErrorAction SilentlyContinue | Format-List Id,StartTime,Path; exit 1
           }
-          # Store PID for later
+          try { $root = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:5140/' -TimeoutSec 10; Write-Host "Root status: $($root.StatusCode)" } catch { Write-Host 'Root probe failed' -ForegroundColor Yellow }
           echo $proc.Id > ../webapp.pid
 
       - name: Run Full Stack Verification
