@@ -35,11 +35,6 @@ public class PredictController : ControllerBase
     public async Task<ActionResult<PredictionResponse>> PredictText([FromBody] TextPredictRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Text)) return BadRequest("Text is required");
-        // Pre-flight ML health (short timeout); if not healthy, fail fast to avoid long retries downstream.
-        if (!await MlHealthyAsync())
-        {
-            return StatusCode(503, new PredictionResponse("ServiceUnavailable: ML health check failed", 0f));
-        }
         PredictionResponse? result = null;
         try
         {
@@ -65,10 +60,6 @@ public class PredictController : ControllerBase
         var file = request.File;
         if (file == null || file.Length == 0) return BadRequest("Image file is required");
         using var stream = file.OpenReadStream();
-        if (!await MlHealthyAsync())
-        {
-            return StatusCode(503, new PredictionResponse("ServiceUnavailable: ML health check failed", 0f));
-        }
         PredictionResponse? result = null;
         try
         {
