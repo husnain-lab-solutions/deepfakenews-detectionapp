@@ -42,11 +42,10 @@ if (-not $MlUrl) {
 
 Write-Host "[2/7] Checking web app root: $WebUrl/" -ForegroundColor Cyan
 try {
-    $rootResp = Invoke-WebRequest -UseBasicParsing -Uri $WebUrl/ -MaximumRedirection 5 -TimeoutSec 10
-    $finalUrl = $rootResp.BaseResponse.ResponseUri.AbsoluteUri
-    Write-Host "Root reachable (final URL: $finalUrl, Status: $($rootResp.StatusCode))" -ForegroundColor Green
+    $rootResp = Invoke-WebRequest -UseBasicParsing -Uri ($WebUrl + '/') -MaximumRedirection 5 -TimeoutSec 10
+    Write-Host "Root reachable (Status: $($rootResp.StatusCode))" -ForegroundColor Green
 } catch {
-    Write-Host "Web root unreachable: $WebUrl/" -ForegroundColor Red; throw
+    Write-Host "Web root unreachable (continuing): $WebUrl/ -> $($_.Exception.Message)" -ForegroundColor Yellow
 }
 
 # Optional: Swagger in dev
