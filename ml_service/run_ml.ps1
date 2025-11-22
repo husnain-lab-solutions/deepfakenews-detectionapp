@@ -102,9 +102,10 @@ try {
 
     if ($Detached) {
         # Launch uvicorn as detached background process, logging to files
-        $pythonwPath = Join-Path $PSScriptRoot '.venv\Scripts\pythonw.exe'
-        $pythonPath = if (Test-Path $pythonwPath) { $pythonwPath } else { (Join-Path $PSScriptRoot '.venv\Scripts\python.exe') }
-        if (-not (Test-Path $pythonPath)) { $pythonPath = 'pythonw' }
+        # Prefer python.exe (pythonw can silently terminate or suppress errors)
+        $pythonExePath = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
+        $pythonPath = if (Test-Path $pythonExePath) { $pythonExePath } else { (Join-Path $PSScriptRoot '.venv\Scripts\pythonw.exe') }
+        if (-not (Test-Path $pythonPath)) { $pythonPath = 'python' }
         $outLog = Join-Path $PSScriptRoot 'uvicorn.out.log'
         $errLog = Join-Path $PSScriptRoot 'uvicorn.err.log'
         $pidFile = Join-Path $PSScriptRoot 'uvicorn.pid'
