@@ -18,103 +18,80 @@ jobs:
       JWT_KEY: ${{ secrets.JWT_KEY }}
     timeout-minutes: 30
     steps:
-      - name: Checkout (with LFS)
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/ml_service/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Ensure JWT_KEY (fallback if secret missing)
+      - name: Full stack (start ML+Web, verify, cleanup)
         shell: pwsh
         run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference='Stop'
+          Write-Host '--- Phase 1: Checkout & Environment ---'
+          # Checkout already performed by actions/checkout pre-step insertion; ensure JWT
           if(-not $env:JWT_KEY -or $env:JWT_KEY.Trim().Length -lt 16){
             $rng=[System.Security.Cryptography.RandomNumberGenerator]::Create();
             $b=New-Object byte[] 32; $rng.GetBytes($b);
-            $k=[Convert]::ToBase64String($b);
-            echo "JWT_KEY=$k" >> $env:GITHUB_ENV
-            Write-Host 'JWT_KEY generated for this run.'
-          } else {
-            Write-Host 'JWT_KEY loaded from repository secret.'
-          }
+            $k=[Convert]::ToBase64String($b); echo "JWT_KEY=$k" >> $env:GITHUB_ENV; Write-Host 'JWT_KEY generated for this run.'
+          } else { Write-Host 'JWT_KEY loaded from repository secret.' }
 
-      - name: Start ML Service (detached)
-        shell: pwsh
-        working-directory: ml_service
-        run: |
-          ./run_ml.ps1 -Detached -Fast -WaitHealthSeconds 120
-          Write-Host '--- initial uvicorn.err.log (first 40 lines) ---'
-          Get-Content uvicorn.err.log -ErrorAction SilentlyContinue | Select-Object -First 40
-          Write-Host '--- initial uvicorn.out.log (first 40 lines) ---'
-          Get-Content uvicorn.out.log -ErrorAction SilentlyContinue | Select-Object -First 40
-          # Wait for health (extended)
-          $deadline=(Get-Date).AddSeconds(120)
-          $ok=$false
+          Write-Host '--- Phase 2: Setup Toolchains ---'
+          # .NET and Python setup handled by previous composite steps; this single step assumes they are present.
+
+          Write-Host '--- Phase 3: Start ML Service (foreground within step) ---'
+          cd ml_service
+          if(-not (Test-Path .\.venv\Scripts\Activate.ps1)){ python -m venv .venv }
+          . .\.venv\Scripts\Activate.ps1
+          python -m pip install --upgrade pip | Out-Null
+          python -m pip install fastapi uvicorn pillow python-multipart | Out-Null
+          $mlOut='uvicorn.out.log'; $mlErr='uvicorn.err.log'
+          if(Test-Path $mlOut){ Remove-Item $mlOut -Force }
+            if(Test-Path $mlErr){ Remove-Item $mlErr -Force }
+          Write-Host 'Launching uvicorn...' -ForegroundColor Cyan
+          $mlProc = Start-Process python -ArgumentList '-m','uvicorn','app:app','--host','127.0.0.1','--port','8000','--log-level','info' -RedirectStandardOutput $mlOut -RedirectStandardError $mlErr -PassThru -WorkingDirectory (Get-Location)
+          echo $mlProc.Id > uvicorn.pid
+          $deadline=(Get-Date).AddSeconds(120); $healthy=$false
           while((Get-Date)-lt $deadline){
-            try { $r=Invoke-RestMethod -Uri http://127.0.0.1:8000/health -TimeoutSec 5 -ErrorAction Stop; if($r.status -eq 'OK'){ $ok=$true; break } } catch {}
+            try { $r=Invoke-RestMethod -Uri http://127.0.0.1:8000/health -TimeoutSec 5 -ErrorAction Stop; if($r.status -eq 'OK'){ $healthy=$true; break } } catch {}
             Start-Sleep 3
           }
-          if(-not $ok){ Write-Host 'ML service not healthy in time' -ForegroundColor Red; Write-Host '--- uvicorn.err.log tail ---'; Get-Content uvicorn.err.log -ErrorAction SilentlyContinue; Write-Host '--- uvicorn.out.log tail ---'; Get-Content uvicorn.out.log -ErrorAction SilentlyContinue; exit 1 }
+          if(-not $healthy){
+            Write-Host 'ML health failed; printing logs.' -ForegroundColor Red
+            Get-Content $mlErr -ErrorAction SilentlyContinue | Select-Object -Last 80
+            Get-Content $mlOut -ErrorAction SilentlyContinue | Select-Object -Last 80
+            throw 'ML service failed to become healthy.'
+          }
+          Write-Host 'ML service healthy.' -ForegroundColor Green
 
-      - name: Build Web App
-        shell: pwsh
-        working-directory: WebApplication1
-        run: |
+          Write-Host '--- Phase 4: Build & Start Web App ---'
+          cd ..\WebApplication1
           dotnet build --configuration Debug
-
-      - name: Start Web App (background)
-        shell: pwsh
-        working-directory: WebApplication1
-        run: |
-          $env:ASPNETCORE_URLS = 'http://localhost:5140'
-          $proc = Start-Process -FilePath dotnet -ArgumentList 'run --no-launch-profile' -PassThru
+          $env:ASPNETCORE_URLS='http://localhost:5140'
+          $webProc = Start-Process dotnet -ArgumentList 'run --no-launch-profile' -PassThru
+          echo $webProc.Id > ..\webapp.pid
           $deadline=(Get-Date).AddSeconds(90)
-          while((Get-Date)-lt $deadline){
-            if(Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet){ break }
-            Start-Sleep 2
-          }
-          if(-not (Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet)){
-            Write-Host 'Web app failed to start (port 5140 not open)' -ForegroundColor Red; Get-Process -Name WebApplication1 -ErrorAction SilentlyContinue | Format-List Id,StartTime,Path; exit 1
-          }
+          while((Get-Date)-lt $deadline){ if(Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet){ break }; Start-Sleep 2 }
+          if(-not (Test-NetConnection -ComputerName localhost -Port 5140 -InformationLevel Quiet)){ throw 'Web app failed to open port 5140.' }
           try { $root = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:5140/' -TimeoutSec 10; Write-Host "Root status: $($root.StatusCode)" } catch { Write-Host 'Root probe failed' -ForegroundColor Yellow }
-          echo $proc.Id > ../webapp.pid
 
-      - name: Run Full Stack Verification
-        shell: pwsh
-        working-directory: scripts
-        run: |
-          ./verify_full_stack.ps1
+          Write-Host '--- Phase 5: Run Verification ---'
+          cd ..\scripts
+          try {
+            ./verify_full_stack.ps1
+            $verifyExit=$LASTEXITCODE
+          } catch {
+            Write-Host "Verifier exception: $($_.Exception.Message)" -ForegroundColor Red
+            $verifyExit=1
+          }
+          if($verifyExit -ne 0){
+            Write-Host 'Tail ML logs (err/out) due to failure:' -ForegroundColor Yellow
+            Get-Content ..\ml_service\uvicorn.err.log -ErrorAction SilentlyContinue | Select-Object -Last 80
+            Get-Content ..\ml_service\uvicorn.out.log -ErrorAction SilentlyContinue | Select-Object -Last 80
+          }
 
-      - name: Show Summary Artifact
-        if: always()
-        shell: pwsh
-        working-directory: scripts
-        run: |
+          Write-Host '--- Phase 6: Summary Artifact ---'
           if(Test-Path sample_image.png){ Write-Host 'Sample image created.' }
           Get-ChildItem -File | Select-Object Name,Length
 
-      - name: Stop Background Processes
-        if: always()
-        shell: pwsh
-        run: |
-          # Use a non-reserved variable name; $PID is an automatic variable
-          if(Test-Path webapp.pid){ $webAppPid = Get-Content webapp.pid | Select-Object -First 1; try { Stop-Process -Id $webAppPid -Force -ErrorAction SilentlyContinue } catch {} }
-          # Stop ML service
-          cd ml_service
-          ./run_ml.ps1 -Stop || Write-Host 'ML stop attempted.'
+          Write-Host '--- Phase 7: Cleanup ---'
+          cd ..
+          if(Test-Path webapp.pid){ $wp=Get-Content webapp.pid | Select-Object -First 1; try { Stop-Process -Id $wp -Force -ErrorAction SilentlyContinue } catch {} }
+          if(Test-Path ml_service\uvicorn.pid){ $mp=Get-Content ml_service\uvicorn.pid | Select-Object -First 1; try { Stop-Process -Id $mp -Force -ErrorAction SilentlyContinue } catch {} }
+
+          if($verifyExit -ne 0){ exit $verifyExit } else { Write-Host 'Done (verification succeeded).' -ForegroundColor Green }

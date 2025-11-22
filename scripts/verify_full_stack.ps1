@@ -77,6 +77,24 @@ Write-Host ("User Identity: {0}" -f (($me | ConvertTo-Json -Compress))) -Foregro
 
 Write-Host "[5/7] Predicting via Web API /api/predict/text ..." -ForegroundColor Cyan
 $predBody = @{ text = $SampleText } | ConvertTo-Json -Compress
+$mlRoot = Split-Path $PSScriptRoot -Parent
+$mlPidPath = Join-Path $mlRoot 'ml_service/uvicorn.pid'
+$mlErrLog = Join-Path $mlRoot 'ml_service/uvicorn.err.log'
+$mlOutLog = Join-Path $mlRoot 'ml_service/uvicorn.out.log'
+if(Test-Path $mlPidPath){
+    $mlPid = Get-Content $mlPidPath | Select-Object -First 1
+    $mlAlive = $false
+    try { if(Get-Process -Id $mlPid -ErrorAction Stop){ $mlAlive = $true } } catch {}
+    if(-not $mlAlive){
+        Write-Host "ML process PID $mlPid not running before prediction attempts." -ForegroundColor Red
+        if(Test-Path $mlErrLog){ Write-Host "--- uvicorn.err.log tail (60) ---" -ForegroundColor DarkYellow; Get-Content $mlErrLog -ErrorAction SilentlyContinue | Select-Object -Last 60 }
+        if(Test-Path $mlOutLog){ Write-Host "--- uvicorn.out.log tail (60) ---" -ForegroundColor DarkYellow; Get-Content $mlOutLog -ErrorAction SilentlyContinue | Select-Object -Last 60 }
+    }
+} else {
+    Write-Host "No uvicorn.pid found; ML may not be running." -ForegroundColor Yellow
+}
+Write-Host "Netstat port 8000 check:" -ForegroundColor Cyan
+try { & netstat -ano | Select-String ":8000" } catch { Write-Host "netstat not available" -ForegroundColor Yellow }
 $apiPred = $null
 for($attempt=1; $attempt -le 5; $attempt++) {
     $resp = $null
@@ -103,6 +121,8 @@ for($attempt=1; $attempt -le 5; $attempt++) {
 }
 if(-not $apiPred){
     Write-Host "Web API prediction failed after retries (continuing to direct ML tests)." -ForegroundColor Red
+    if(Test-Path $mlErrLog){ Write-Host "--- uvicorn.err.log tail (60) after API failure ---" -ForegroundColor DarkYellow; Get-Content $mlErrLog -ErrorAction SilentlyContinue | Select-Object -Last 60 }
+    if(Test-Path $mlOutLog){ Write-Host "--- uvicorn.out.log tail (60) after API failure ---" -ForegroundColor DarkYellow; Get-Content $mlOutLog -ErrorAction SilentlyContinue | Select-Object -Last 60 }
 } else {
     $apiPredJson = $apiPred | ConvertTo-Json -Compress
     Write-Host "Web API Prediction: $apiPredJson" -ForegroundColor Yellow
